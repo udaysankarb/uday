@@ -1,0 +1,35 @@
+from whoosh.index import create_in
+from whoosh.fields import Schema, TEXT, DATETIME, ID
+from whoosh.qparser import QueryParser
+import os
+import json
+
+INDEX_DIR = 'index'
+
+schema = Schema(
+    log_level=TEXT(stored=True),
+    log_string=TEXT(stored=True),
+    timestamp=DATETIME(stored=True),
+    source=ID(stored=True)
+)
+
+if not os.path.exists(INDEX_DIR):
+    os.makedirs(INDEX_DIR)
+
+index = create_in(INDEX_DIR, schema)
+
+def index_logs():
+    writer = index.writer()
+    for log_file in os.listdir(LOG_DIR):
+        with open(os.path.join(LOG_DIR, log_file), 'r') as f:
+            for line in f:
+                log_data = json.loads(line)
+                writer.add_document(
+                    log_level=log_data['level'],
+                    log_string=log_data['log_string'],
+                    timestamp=datetime.fromisoformat(log_data['timestamp'][:-1]),
+                    source=log_data['metadata']['source']
+                )
+    writer.commit()
+
+index_logs()
