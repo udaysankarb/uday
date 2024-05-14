@@ -1,0 +1,22 @@
+from rich.console import Console
+from rich.table import Table
+
+console = Console()
+
+def search_logs(query):
+    qp = QueryParser("log_string", schema=index.schema)
+    q = qp.parse(query)
+    with index.searcher() as searcher:
+        results = searcher.search(q)
+        table = Table(show_header=True, header_style="bold magenta")
+        table.add_column("Level")
+        table.add_column("Log String")
+        table.add_column("Timestamp")
+        table.add_column("Source")
+        
+        for result in results:
+            table.add_row(result['log_level'], result['log_string'], str(result['timestamp']), result['source'])
+        
+        console.print(table)
+
+search_logs("Failed to connect")
