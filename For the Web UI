@@ -1,0 +1,16 @@
+from flask import Flask, request, render_template
+from whoosh.qparser import QueryParser
+
+app = Flask(__name__)
+
+@app.route('/search', methods=['GET'])
+def search():
+    query = request.args.get('query')
+    qp = QueryParser("log_string", schema=index.schema)
+    q = qp.parse(query)
+    with index.searcher() as searcher:
+        results = searcher.search(q)
+        return render_template('results.html', results=results)
+
+if __name__ == '__main__':
+    app.run(port=5001)
